@@ -1,0 +1,50 @@
+#include <msp430.h> 
+
+void main(void) {
+    WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
+      //Button I am using is port 1.1
+      //LEDs I am using are ports 1.0 and 4.7
+      //P1SEL &= ~BIT1; //Set the button pin to I/O
+      P1DIR &= ~BIT1; //Sets button2, pin1.2 as an input
+      P1REN |=  BIT1; //Enables the pullup/down resistor
+      P1OUT |=  BIT1; //Set the resistor to be a pullup resistor
+
+      //PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mode
+                                              // to activate previously configured port settings
+      P1DIR |= BIT0; //sets the direction of pin 1 to output
+      P1OUT &= ~BIT0; //sets output high
+      P4DIR |= BIT7; //sets the direction of pin 1 to output
+      P4OUT &= ~BIT7; //sets output high
+// Interrupt stuff
+      P1IE |=BIT1;//enable the interrupt on Port 1.1
+      P1IES |=BIT1;//set as falling edge
+      P1IFG &=~(BIT1);//clear interrupt flag
+//enter LPM4 mode and enable global interrupt
+      //__bis_SR_register(GIE);
+      _BIS_SR(LPM4_bits + GIE);
+int count = 0;
+while(1)
+{
+    if((P1IN&BIT1)==0)//button 1 counts
+              {
+                  count++;
+              }
+    if((counter)=>255)//button 2 is a reset
+              {
+              count=0;
+              }     
+    P1OUT |= count; // sets what led to is to light up. 
+}
+
+} 
+//Port 1 ISR
+#pragma vector=PORT1_VECTOR
+__interrupt void PORT_1(void)
+    {
+        P4OUT ^= BIT7;
+        P1IFG &=~(BIT1);
+    }
+
+
+
+
